@@ -241,6 +241,7 @@ function _reconnect()
 	if(this.tries === 0)
 	{
 		this.connect();
+		return;
 	}
 	else if( this.tries === 1)
 	{
