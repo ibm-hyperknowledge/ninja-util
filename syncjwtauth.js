@@ -15,11 +15,18 @@ class SyncJWTAuth
 	constructor (secret)
 	{
 		this._secret = secret;
+		this._token  = null;
+	}
+
+	setAuth (token)
+	{
+		this._token = token;
 	}
 
 	sign (message)
 	{
-		return { bearer: jwt.sign(message || {}, this._secret) };
+		return this._token ? this._token :
+			{ bearer: jwt.sign(message || {}, this._secret) };
 	}
 
 	verify ( { bearer } )
