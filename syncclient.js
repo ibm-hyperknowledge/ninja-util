@@ -59,19 +59,14 @@ function SyncClient(url, authenticator)
 
 SyncClient.prototype.connectToSession = function(user, session)
 {
-	this.user = user;
-	this.session = session;
-
-
-	_sendJoinMessage.call(this);
-
+	_sendJoinMessage.call(this, user, session);
 }
 
-SyncClient.prototype.sendMessage = function(type, data)
+SyncClient.prototype.sendMessage = function(type, data, session = undefined)
 {
 	let message = {
 		type: type,
-		session: this.session,
+		session: this.session || session,
 		data: data
 	};
 
@@ -129,6 +124,9 @@ function _onMessage(event)
 
 	if (type === SyncMessages.JOIN_SUCCESSFUL_MESSAGE)
 	{
+		this.user = message.data.user;
+		this.session = message.session;
+
 		if(!this.sessionState)
 		{
 			this.sessionState = message.data.state;
@@ -169,10 +167,10 @@ function _onMessage(event)
 	}
 }
 
-function _sendJoinMessage()
+function _sendJoinMessage(user, session)
 {
 	this.notify(onSyncJoining);
-	this.sendMessage(SyncMessages.JOIN_MESSAGE, {user: this.user});
+	this.sendMessage(SyncMessages.JOIN_MESSAGE, {user: user}, session);
 }
 
 function _onOpen(event)
