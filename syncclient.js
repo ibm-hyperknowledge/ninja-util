@@ -9,19 +9,20 @@ const Observer = require("./observer");
 
 const SyncMessages = require("./syncmessages");
 
-const onSyncConnecting 		= "onSyncConnecting";
-const onSyncConnected 		= "onSyncConnected";
-const onSyncDesconnected 	= "onSyncDesconnected";
-const onSyncClosed			= "onSyncClosed";
-const onSyncMessage 		= "onSyncMessage";
-const onSyncJoined 			= "onSyncJoined";
-const onSyncJoining 		= "onSyncJoining";
-const onSyncJoinFailed 		= "onSyncJoinFailed";
-const onClientJoined 		= "onClientJoined";
-const onClientLeft 			= "onClientLeft";
+const onSyncConnecting   = "onSyncConnecting";
+const onSyncConnected    = "onSyncConnected";
+const onSyncDesconnected = "onSyncDesconnected";
+const onSyncClosed       = "onSyncClosed";
+const onSyncMessage      = "onSyncMessage";
+const onSyncJoined       = "onSyncJoined";
+const onSyncJoining      = "onSyncJoining";
+const onSyncJoinFailed   = "onSyncJoinFailed";
+const onClientJoined     = "onClientJoined";
+const onClientLeft       = "onClientLeft";
 
+const WEBSOCKET = typeof (window) === 'undefined' ? require ('ws') : WebSocket;
 
-function SyncClient(url)
+function SyncClient(url, authenticator)
 {
 	this._ws = null;
 	this.pendingMessages = [];
@@ -29,6 +30,7 @@ function SyncClient(url)
 	this.session = null;
 	this.sessionState = null;
 	this.closed = false;
+	this.authenticator = authenticator;
 
 	this._tries = 0;
 
@@ -49,8 +51,7 @@ function SyncClient(url)
 	{
 		this._url = url;
 	}
-	
-    
+
 	Observer.initSubject(this);
 	this.connect();
 }
@@ -60,34 +61,39 @@ SyncClient.prototype.connectToSession = function(user, session)
 {
 	this.user = user;
 	this.session = session;
-	
+
 
 	_sendJoinMessage.call(this);
-	
+
 }
 
 SyncClient.prototype.sendMessage = function(type, data)
 {
-    let message = {
+	let message = {
 		type: type,
 		session: this.session,
 		data: data
 	};
-	
-	if(this._ws.readyState === WebSocket.OPEN)
+
+	if (this.authenticator)
+	{
+		message.auth = this.authenticator.sign (message);
+	}
+
+	if(this._ws.readyState === WEBSOCKET.OPEN)
 	{
 		this._ws.send(JSON.stringify(message));
 	}
 	else
 	{
-		this.pendingMessages.push(message);	
+		this.pendingMessages.push(message);
 	}
 }
 
 SyncClient.prototype.connect = function()
 {
 	this.closed = false;
-	this._ws = new WebSocket(this._url);
+	this._ws = new WEBSOCKET(this._url);
 
 	_notifyStatus.call(this);
 
@@ -132,7 +138,7 @@ function _onMessage(event)
 		{
 			this.sessionState = message.data.state;
 			this.notify(onSyncJoined, this.user);
-	
+
 			_sendPendingMessages.call(this);
 		}
 		else
@@ -189,19 +195,20 @@ function _onOpen(event)
 function _sendPendingMessages()
 {
 	if(this.pendingMessages.length > 0)
-    {
-        for(let i = 0; i < this.pendingMessages.length; i++)
-        {
-            let msg = this.pendingMessages[i];
-            this._ws.send(JSON.stringify(msg));
-        }
-    }
-    this.pendingMessages = [];
+	{
+		for(let i = 0; i < this.pendingMessages.length; i++)
+		{
+			let msg = this.pendingMessages[i];
+			this._ws.send(JSON.stringify(msg));
+		}
+	}
+	this.pendingMessages = [];
 }
+
 function _onClose(event)
 {
 	_notifyStatus.call(this);
-	
+
 	if(!this.closed)
 	{
 		_reconnect.call(this);
@@ -210,25 +217,25 @@ function _onClose(event)
 
 function _notifyStatus()
 {
-	if (this._ws.readyState === WebSocket.CONNECTING)
+	if (this._ws.readyState === WEBSOCKET.CONNECTING)
 	{
 		this.notify(onSyncConnecting, this);
 	}
-	else if (this._ws.readyState === WebSocket.OPEN)
+	else if (this._ws.readyState === WEBSOCKET.OPEN)
 	{
 		console.log("websocket connection is open");
 		this.notify(onSyncConnected, this);
 	}
-	else if (this._ws.readyState === WebSocket.CLOSING)
+	else if (this._ws.readyState === WEBSOCKET.CLOSING)
 	{
 		// Empty.
 	}
-	else if (this._ws.readyState === WebSocket.CLOSED)
+	else if (this._ws.readyState === WEBSOCKET.CLOSED)
 	{
 		console.log("websocket connection is closed");
 		this.notify(onSyncDesconnected, this);
 	}
-	else 
+	else
 	{
 		// Unknown state
 		console.warn("Unknow state", this._ws.readyState);

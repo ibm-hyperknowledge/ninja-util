@@ -1,6 +1,6 @@
 {
   "name": "ninja-util",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "Helper library to develop Node.JS applications",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "main": "index.js",
   "contributors": [
-	{
+    {
       "name": "Polyana Costa",
       "email": "polyana.bezerra@ibm.com"
     },
