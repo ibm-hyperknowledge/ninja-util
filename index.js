@@ -15,4 +15,5 @@ exports.Observer          = require("./observer");
 exports.Promisify         = require("./promisify");
 exports.SyncClient        = require("./syncclient");
 exports.SyncServer        = require("./syncserver");
+exports.SyncJWTAuth       = require("./syncjwtauth");
 exports.Timer             = require("./timer");
