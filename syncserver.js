@@ -5,19 +5,20 @@
 
 'use strict'
 
-const WebSocket 	= require('ws');
-const Observer 		= require("./observer");
-const SyncMessages 	= require("./syncmessages");
-const shortid		= require("shortid");
+const WebSocket    = require('ws');
+const Observer     = require("./observer");
+const SyncMessages = require("./syncmessages");
+const shortid      = require("shortid");
 
 const DEFAULT_HEARTBEAT_INTERVAL = 30;
 
-function SyncServer()
+function SyncServer(authenticator)
 {
-	this.sessions = {};
-	this.clients = {};
-	this.logLevel = 0;
+	this.sessions      = {};
+	this.clients       = {};
+	this.logLevel      = 0;
 	this.sessionStates = {};
+	this.authenticator = authenticator;
 
 	this.heartBeatInterval = DEFAULT_HEARTBEAT_INTERVAL;
 
@@ -32,7 +33,6 @@ function SyncServer()
 
 	Observer.initSubject(this);
 }
-
 
 SyncServer.prototype.broadcast = function(session, messages)
 {
@@ -54,6 +54,7 @@ SyncServer.prototype.updateState = function(sessionName)
 	_broadcast.call(this, null, sessionName, msg);
 }
 
+
 SyncServer.prototype.startListening = function(server)
 {
 	const wss = new WebSocket.Server(
@@ -61,8 +62,6 @@ SyncServer.prototype.startListening = function(server)
 		server: server
 	});
 
-	
-    
 	wss.on('connection', (ws) =>
 	{
 		let clientId = shortid();
@@ -71,7 +70,7 @@ SyncServer.prototype.startListening = function(server)
 		{
 			_onMessage.call(this, ws, clientId, message);
 		});
-		
+
 		ws.on('close', () =>
 		{
 			console.log('-->connection closed: #' + Object.keys(this.clients).length);
@@ -99,15 +98,30 @@ function _onMessage (ws, clientId, rawMessage)
 	{
 		let message = JSON.parse(rawMessage);
 		let type = message.type;
-	
-		if (type == SyncMessages.JOIN_MESSAGE)
+
+		let authenticated = true;
+
+		if (this.authenticator)
 		{
-			_onJoinClient.call(this, ws, clientId, message);
+			authenticated = this.authenticator.verify (message.auth || {});
+			delete message.auth; /* this prevent the auth to be broadcasted*/
+		}
+
+		if (authenticated)
+		{
+			if (type == SyncMessages.JOIN_MESSAGE)
+			{
+				_onJoinClient.call(this, ws, clientId, message);
+			}
+			else
+			{
+				this.notify("onSyncMessage", message.session, message);
+				_broadcast.call(this, ws, message.session, [message]);
+			}
 		}
 		else
 		{
-			this.notify("onSyncMessage", message.session, message);
-			_broadcast.call(this, ws, message.session, [message]);
+			_onAuthenticationFailure.call(this, ws, message.session);
 		}
 	}
 	catch(exp)
@@ -138,7 +152,7 @@ function _onJoinClient(ws, clientId, message)
 
 		// Send to user that it is connected
 		let successMessage = {
-			type: SyncMessages.JOIN_SUCCESSFUL_MESSAGE, 
+			type: SyncMessages.JOIN_SUCCESSFUL_MESSAGE,
 			session: sessionName,
 			data: {
 				user: user,
@@ -150,7 +164,7 @@ function _onJoinClient(ws, clientId, message)
 
 		// Send to other users that a new user joined
 		let newClientMsg = {
-			type: SyncMessages.CLIENT_JOIN_MESSAGE, 
+			type: SyncMessages.CLIENT_JOIN_MESSAGE,
 			session: sessionName,
 			data: {user: user}
 		};
@@ -160,7 +174,7 @@ function _onJoinClient(ws, clientId, message)
 		for(let i = 0; i < peers.length; i++)
 		{
 			let previousUserMsg = {
-				type: SyncMessages.CLIENT_JOIN_MESSAGE, 
+				type: SyncMessages.CLIENT_JOIN_MESSAGE,
 				session: sessionName,
 				data: {
 					user: peers[i]
@@ -173,7 +187,7 @@ function _onJoinClient(ws, clientId, message)
 	else
 	{
 		let failMsg = {
-			type: SyncMessages.JOIN_FAILED_MESSAGE, 
+			type: SyncMessages.JOIN_FAILED_MESSAGE,
 			session: sessionName,
 			data: {
 				error: `User ${user} already connected`
@@ -181,7 +195,6 @@ function _onJoinClient(ws, clientId, message)
 		};
 		ws.send(JSON.stringify(failMsg));
 	}
-
 }
 
 function _onClose(clientId)
@@ -240,6 +253,18 @@ function _broadcast(wsSender, sessionName, messages = [])
 			}
 		}
 	}
+}
+
+function _onAuthenticationFailure(ws, sessionName)
+{
+	let failureMessage = {
+		type: SyncMessages.ERROR_MESSAGE,
+		session: sessionName,
+		data: {
+			message: 'Unauthorized',
+		}
+	};
+	ws.send(JSON.stringify(failureMessage));
 }
 
 module.exports = SyncServer;
