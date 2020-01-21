@@ -31,6 +31,7 @@ function SyncClient(url, authenticator)
 	this.sessionState = null;
 	this.closed = false;
 	this.authenticator = authenticator;
+	this.authEnabled = this.authenticator ? true : false;
 
 	this._tries = 0;
 
@@ -70,7 +71,7 @@ SyncClient.prototype.sendMessage = function(type, data, session = undefined)
 		data: data
 	};
 
-	if (this.authenticator)
+	if (this.authEnabled && this.authenticator)
 	{
 		message.auth = this.authenticator.sign (message);
 	}
@@ -115,6 +116,11 @@ SyncClient.prototype.closeSession = function()
 	this.notify(onSyncClosed);
 
 	console.log("close session");
+}
+
+SyncClient.prototype.disableAuth = function()
+{
+	this.authEnabled = false;
 }
 
 function _onMessage(event)
