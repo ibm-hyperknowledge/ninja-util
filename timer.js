@@ -1,6 +1,10 @@
 /*
- * Copyright (c) 2016-present, IBM Research
- * Licensed under The MIT License [see LICENSE for details]
+ * copyright: IBM Confidential
+ * copyright: OCO Source Materials
+ * copyright: © IBM Corp. All Rights Reserved
+ * date: 2020
+ *
+ * IBM Certificate of Originality
  */
 
 "use strict";
@@ -58,9 +62,9 @@ Timer.prototype.restart = function()
 	this.currentTime = new Date();
 }
 
-Timer.prototype.tick = function(label)
+Timer.prototype.tick = function(...args)
 {
-	this.logger.log(label + " " + this.getTimeString());
+    console.log.apply(this.logger, args.concat([this.getTimeString()]));
 	this.restart();
 }
 
