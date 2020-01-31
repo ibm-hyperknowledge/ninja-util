@@ -1,12 +1,21 @@
 /*
- * Copyright (c) 2016-present, IBM Research
- * Licensed under The MIT License [see LICENSE for details]
+ * copyright: IBM Confidential
+ * copyright: OCO Source Materials
+ * copyright: © IBM Corp. All Rights Reserved
+ * date: 2020
+ *
+ * IBM Certificate of Originality
  */
 
-"use strict"; 
+"use strict";
+
+function Memory(logger)
+{
+	this.logger = logger || console;
+}
 
 
-function compreensiveBytes(bytesCount)
+Memory.prototype.compreensiveBytes = function(bytesCount)
 {
 	if(bytesCount < 1024)
 	{
@@ -22,41 +31,26 @@ function compreensiveBytes(bytesCount)
 	}
 }
 
-function getCurrentMemory(asNumber = false)
+Memory.prototype.getCurrentMemory = function (asNumber = false)
 {
     return asNumber ? process.memoryUsage().heapUsed : compreensiveBytes(process.memoryUsage().heapUsed)
 }
 
-function checkMemory (log = null)
+Memory.prototype.checkMemory = function (...args)
 {
-	if(global.gc)
+    if(global.gc)
 	{
-		global.gc();
+        global.gc();
     }
     if(process)
     {
-        if(log)
-        {
-            console.log(log, getCurrentMemory());
-        }
-        else
-        {
-            console.log(getCurrentMemory());
-        }
+        console.log.apply(this.logger, args.concat([getCurrentMemory()]));
     }
     else
     {
-        if(log)
-        {
-            console.log(log, "N/A");
-        }
-        else
-        {
-            console.log("N/A");
-        }
+        logger.log("N/A");
+        
     }
 }
 
-exports.checkMemory = checkMemory;
-exports.getCurrentMemory = getCurrentMemory;
-exports.compreensiveBytes = compreensiveBytes;
+module.exports = Memory;
