@@ -56,5 +56,4 @@ function checkMemory(...args)
 	memory.checkMemory(...args);
 }
 
-Memory.checkMemory = checkMemory;
 module.exports = Memory;
