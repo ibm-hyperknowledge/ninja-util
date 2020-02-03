@@ -5,13 +5,9 @@
 
 "use strict";
 
-function Memory(logger)
-{
-	this.logger = logger || console;
-}
 
 
-Memory.prototype.compreensiveBytes = function(bytesCount)
+function compreensiveBytes (bytesCount)
 {
 	if(bytesCount < 1024)
 	{
@@ -25,6 +21,11 @@ Memory.prototype.compreensiveBytes = function(bytesCount)
 	{
 		return `${ (bytesCount / (1024 * 1024)).toFixed(2)}mb`;
 	}
+}
+
+function Memory(logger)
+{
+	this.logger = logger || console;
 }
 
 Memory.prototype.getCurrentMemory = function (asNumber = false)
@@ -55,5 +56,5 @@ function checkMemory(...args)
 	memory.checkMemory(...args);
 }
 
+Memory.checkMemory = checkMemory;
 module.exports = Memory;
-module.exports = checkMemory;
