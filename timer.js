@@ -64,7 +64,7 @@ Timer.prototype.restart = function()
 
 Timer.prototype.tick = function(...args)
 {
-    console.log.apply(this.logger, args.concat([this.getTimeString()]));
+	this.logger.log.apply(this.logger, args.concat([this.getTimeString()]));
 	this.restart();
 }
 

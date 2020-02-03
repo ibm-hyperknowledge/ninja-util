@@ -44,7 +44,7 @@ Memory.prototype.checkMemory = function (...args)
     }
     if(process)
     {
-        console.log.apply(this.logger, args.concat([getCurrentMemory()]));
+        this.logger.log.apply(this.logger, args.concat([this.getCurrentMemory()]));
     }
     else
     {
@@ -53,4 +53,11 @@ Memory.prototype.checkMemory = function (...args)
     }
 }
 
+function checkMemory(...args)
+{
+	let memory = new Memory();
+	memory.checkMemory(...args);
+}
+
 module.exports = Memory;
+module.exports = checkMemory;
