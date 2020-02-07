@@ -212,14 +212,25 @@ function _extractParams(req)
 			tokendata = null;
 	}
 
-	return {
-		tokendata: tokendata,
-		headers: req.headers,
-		query: req.query,
-		params: req.params,
-		body: req.body,
-		outMimeType: null
-	};
+	if (req.headers['content-type'] == 'application/octet-stream'){
+		return {
+			tokendata: tokendata,
+			headers: req.headers,
+			query: req.query,
+			params: req.params,
+			stream: req,
+			outMimeType: null
+		};
+	} else{
+		return {
+			tokendata: tokendata,
+			headers: req.headers,
+			query: req.query,
+			params: req.params,
+			body: req.body,
+			outMimeType: null
+		};
+	}
 };
 
 function sendResponse (req, res, err, streamResponse, data, outMimeType = null)
