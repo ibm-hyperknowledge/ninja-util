@@ -3,10 +3,11 @@
  * Licensed under The MIT License [see LICENSE for details]
  */
 
-"use strict"; 
+"use strict";
 
 
-function compreensiveBytes(bytesCount)
+
+function compreensiveBytes (bytesCount)
 {
 	if(bytesCount < 1024)
 	{
@@ -22,41 +23,38 @@ function compreensiveBytes(bytesCount)
 	}
 }
 
-function getCurrentMemory(asNumber = false)
+function Memory(logger)
+{
+	this.logger = logger || console;
+}
+
+Memory.prototype.getCurrentMemory = function (asNumber = false)
 {
     return asNumber ? process.memoryUsage().heapUsed : compreensiveBytes(process.memoryUsage().heapUsed)
 }
 
-function checkMemory (log = null)
+Memory.prototype.checkMemory = function (...args)
 {
-	if(global.gc)
+    if(global.gc)
 	{
-		global.gc();
+        global.gc();
     }
     if(process)
     {
-        if(log)
-        {
-            console.log(log, getCurrentMemory());
-        }
-        else
-        {
-            console.log(getCurrentMemory());
-        }
+        this.logger.log.apply(this.logger, args.concat([this.getCurrentMemory()]));
     }
     else
     {
-        if(log)
-        {
-            console.log(log, "N/A");
-        }
-        else
-        {
-            console.log("N/A");
-        }
+        logger.log("N/A");
+        
     }
 }
 
-exports.checkMemory = checkMemory;
-exports.getCurrentMemory = getCurrentMemory;
-exports.compreensiveBytes = compreensiveBytes;
+function checkMemory(...args)
+{
+	let memory = new Memory();
+	memory.checkMemory(...args);
+}
+
+Memory.checkMemory = checkMemory;
+module.exports = Memory;

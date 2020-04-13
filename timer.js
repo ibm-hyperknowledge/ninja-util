@@ -9,11 +9,13 @@ const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
 const HOUR_MS = 60 * MINUTE_MS;
 
-function Timer(logger)
+function Timer(logger, method = "log")
 {
 	this.currentTime = new Date();
 
 	this.logger = logger || console;
+
+	this.method = method || "log";
 }
 
 Timer.prototype.getCurrentTime = function()
@@ -58,9 +60,9 @@ Timer.prototype.restart = function()
 	this.currentTime = new Date();
 }
 
-Timer.prototype.tick = function(label)
+Timer.prototype.tick = function(...args)
 {
-	this.logger.log(label + " " + this.getTimeString());
+	this.logger[this.method].apply(this.logger, args.concat([this.getTimeString()]));
 	this.restart();
 }
 
