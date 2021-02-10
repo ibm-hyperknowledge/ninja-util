@@ -3,7 +3,7 @@
  * Licensed under The MIT License [see LICENSE for details]
  */
 
-"use strict";
+"use strict"; 
 
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
