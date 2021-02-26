@@ -148,7 +148,8 @@ Injector.prototype.addResource = function(resource, reference = null, dependenci
             for(let i = 0; i < dependencies.length; i++)
             {
                 let dep = dependencies[i];
-                let alias = this._aliasCallback(dep, reference);
+                var dependencyName = (typeof dep === 'function')? dep.name : dep;
+                let alias = this._aliasCallback(dependencyName, reference);
 
 				if(typeof alias === "function")
 				{
