@@ -1,6 +1,6 @@
 {
   "name": "ninja-util",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Helper library to develop Node.JS applications",
   "repository": {
     "type": "git",
@@ -21,7 +21,11 @@
     {
       "name": "Wallas Henrique",
       "email": "wallas.sousa@ibm.com"
-    }
+    },
+	{
+	  "name": "Marcelo Machado",
+	  "email": "mmachado@ibm.com"
+	}
   ],
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
