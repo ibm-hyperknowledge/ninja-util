@@ -1,35 +1,35 @@
 {
-  "name": "ninja-util",
-  "version": "1.2.3",
-  "description": "Helper library to develop Node.JS applications",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ibm-hyperknowledge/ninja-util"
-  },
-  "author": "IBM Research",
-  "license": "MIT",
-  "main": "index.js",
-  "contributors": [
-    {
-      "name": "Polyana Costa",
-      "email": "polyana.bezerra@ibm.com"
+    "name": "ninja-util",
+    "version": "1.2.3",
+    "description": "Helper library to develop Node.JS applications",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ibm-hyperknowledge/ninja-util"
     },
-    {
-      "name": "Rodrigo Costa",
-      "email": "rodrigo.costa@ibm.com"
-    },
-    {
-      "name": "Wallas Henrique",
-      "email": "wallas.sousa@ibm.com"
-    },
-	{
-	  "name": "Marcelo Machado",
-	  "email": "mmachado@ibm.com"
-	}
-  ],
-  "dependencies": {
-    "jsonwebtoken": "^8.5.1",
-    "shortid": "^2.2.14",
-    "ws": "^7.0.0"
-  }
+    "author": "IBM Research",
+    "license": "MIT",
+    "main": "index.js",
+    "contributors": [
+        {
+            "name": "Polyana Costa",
+            "email": "polyana.bezerra@ibm.com"
+        },
+        {
+            "name": "Rodrigo Costa",
+            "email": "rodrigo.costa@ibm.com"
+        },
+        {
+            "name": "Wallas Henrique",
+            "email": "wallas.sousa@ibm.com"
+        },
+        {
+            "name": "Marcelo Machado",
+            "email": "mmachado@ibm.com"
+        }
+    ],
+    "dependencies": {
+        "jsonwebtoken": "^8.5.1",
+        "shortid": "^2.2.14",
+        "ws": "^7.0.0"
+    }
 }
