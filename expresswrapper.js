@@ -326,6 +326,7 @@ function _request(method, route, streamResponse, callback)
 		{
 			try
 			{
+				this.console.debug(`Route ${req.originalUrl} accessed with method ${method}`);
 				let params = _extractParams.call(this, req);
 
 				this.logRequest (req);
