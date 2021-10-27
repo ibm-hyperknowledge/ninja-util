@@ -7,7 +7,7 @@
 
 
 const FunctionNameRegex = /\s*function\s*([\w\d_]+)\s*\(([\w\s\,_]*)\)/;
-const ClassNameRegex = /\s*class\s*([\w\d_]+)\s*(extends [\w]*)?\s*\{\s*(constructor\s*\(([\w\s\,_]*)\))?/
+const ClassNameRegex = /\s*class\s*([\w\d_]+)\s*(extends [\w]*)?\s*\{\s*(\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$)?\s*(constructor\s*\(([\w\s\,_]*)\))?/
 
 function Injector()
 {
@@ -115,7 +115,7 @@ Injector.prototype.addResource = function(resource, reference = null, dependenci
 		{
 			functionPart = ClassNameRegex.exec(classStr);
 
-			argumentIdx = 4;
+			argumentIdx = 6;
 		}
 
         if(functionPart && functionPart.length >= 2)
@@ -148,7 +148,8 @@ Injector.prototype.addResource = function(resource, reference = null, dependenci
             for(let i = 0; i < dependencies.length; i++)
             {
                 let dep = dependencies[i];
-                let alias = this._aliasCallback(dep, reference);
+                var dependencyName = (typeof dep === 'function')? dep.name : dep;
+                let alias = this._aliasCallback(dependencyName, reference);
 
 				if(typeof alias === "function")
 				{
