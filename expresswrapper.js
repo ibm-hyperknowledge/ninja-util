@@ -14,7 +14,7 @@ function ExpressWrapper(app)
 {
 	this.auth_mode = ExpressWrapper.AUTH_NONE;
 	this.auth_arg = null;
-  app.use(boolParser());
+	app.use(boolParser());
 	this.app = app;
 	this.logLevel = ExpressWrapper.LOG_NONE;
 	this.logOptions = {};
