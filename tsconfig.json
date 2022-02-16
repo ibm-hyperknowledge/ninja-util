@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "declarationDir": "./types"
+  },
+  "include" :[
+    "./*.js",
+  ],
+  "exclude": [
+    "test/**/*",
+    "node_modules/**/*",
+    "types/**/*",
+  ]
+}
