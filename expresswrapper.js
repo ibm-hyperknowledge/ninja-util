@@ -9,11 +9,13 @@ const NHttpError = require('./nhttperror')
 const Timer      = require('./timer');
 const uid        = require('shortid');
 const boolParser = require('express-query-boolean');
+const fileupload = require("express-fileupload");
 
 function ExpressWrapper(app)
 {
 	this.auth_mode = ExpressWrapper.AUTH_NONE;
 	this.auth_arg = null;
+	app.use(fileupload({ createParentPath: true }));
 	app.use(boolParser());
 	this.app = app;
 	this.logLevel = ExpressWrapper.LOG_NONE;
@@ -214,25 +216,29 @@ function _extractParams(req)
 			tokendata = null;
 	}
 
-	if (req.headers['content-type'] == 'application/octet-stream'){
-		return {
-			tokendata: tokendata,
-			headers: req.headers,
-			query: req.query,
-			params: req.params,
-			stream: req,
-			outMimeType: null
-		};
-	} else{
-		return {
-			tokendata: tokendata,
-			headers: req.headers,
-			query: req.query,
-			params: req.params,
-			body: req.body,
-			outMimeType: null
-		};
+	let newReq = {
+		tokendata: tokendata,
+		headers: req.headers,
+		query: req.query,
+		params: req.params,
+		outMimeType: null
 	}
+
+	if (req.headers['content-type'] == 'application/octet-stream')
+	{
+		newReq = Object.assign(newReq, { stream: req });
+	}
+	else
+	{
+		newReq = Object.assign(newReq, { body: req.body });
+	}
+
+	if(req.files)
+	{
+		newReq = Object.assign(newReq, { files: req.files });
+	}
+
+	return newReq;
 };
 
 function sendResponse (req, res, err, streamResponse, data, outMimeType = null)
@@ -436,4 +442,3 @@ ExpressWrapper.LOG_NONE         = 0;
 ExpressWrapper.LOG_REQUESTS     = 1;
 
 module.exports = ExpressWrapper;
-
