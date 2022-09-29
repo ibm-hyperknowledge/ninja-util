@@ -9,13 +9,12 @@ const NHttpError = require('./nhttperror')
 const Timer      = require('./timer');
 const uid        = require('shortid');
 const boolParser = require('express-query-boolean');
-const fileupload = require("express-fileupload");
+const multer = require("multer");
 
 function ExpressWrapper(app)
 {
 	this.auth_mode = ExpressWrapper.AUTH_NONE;
 	this.auth_arg = null;
-	app.use(fileupload({ createParentPath: true }));
 	app.use(boolParser());
 	this.app = app;
 	this.logLevel = ExpressWrapper.LOG_NONE;
@@ -326,10 +325,16 @@ function sendResponse (req, res, err, streamResponse, data, outMimeType = null)
 	}
 }
 
-function _request(method, route, streamResponse, callback)
+function _request(method, route, streamResponse, callback, middlewares)
 {
-	if (method === "post" || method === "put" || method === "delete" || method === "get")
+	if ( method === "post" || method === "put" || method === "delete" || method === "get")
 	{
+		if (middlewares) {
+			middlewares.forEach(middleware => {
+				this.app.use(route, middleware);	
+			});
+		}
+		
 		this.app[method](route, (req, res) =>
 		{
 			try
@@ -379,7 +384,7 @@ function _request(method, route, streamResponse, callback)
 	}
 };
 
-ExpressWrapper.prototype.get = function(route, streamResponse, callback)
+ExpressWrapper.prototype.get = function(route, streamResponse, callback, middlewares)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -387,10 +392,10 @@ ExpressWrapper.prototype.get = function(route, streamResponse, callback)
 		streamResponse = false;
 	}
 
-	_request.call(this, "get", route, streamResponse, callback);
+	_request.call(this, "get", route, streamResponse, callback, middlewares);
 };
 
-ExpressWrapper.prototype.post = function(route, streamResponse, callback)
+ExpressWrapper.prototype.post = function(route, streamResponse, callback, middlewares)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -398,27 +403,27 @@ ExpressWrapper.prototype.post = function(route, streamResponse, callback)
 		streamResponse = false;
 	}
 
-	_request.call(this, "post", route, streamResponse, callback);
+	_request.call(this, "post", route, streamResponse, callback, middlewares);
 };
 
-ExpressWrapper.prototype.put = function(route, streamResponse, callback)
+ExpressWrapper.prototype.put = function(route, streamResponse, callback, middlewares)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "put", route, streamResponse, callback);
+	_request.call(this, "put", route, streamResponse, callback, middlewares, middlewares);
 };
 
-ExpressWrapper.prototype.delete = function(route, streamResponse, callback)
+ExpressWrapper.prototype.delete = function(route, streamResponse, callback, middlewares)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "delete", route, streamResponse, callback);
+	_request.call(this, "delete", route, streamResponse, callback, middlewares);
 };
 
 ExpressWrapper.prototype.getApp = function()
