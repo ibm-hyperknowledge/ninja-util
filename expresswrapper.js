@@ -326,19 +326,24 @@ function sendResponse (req, res, err, streamResponse, data, outMimeType = null)
 	}
 }
 
-function _request(method, route, streamResponse, callback)
+function _request(method, route, streamResponse, callback, options)
 {
-	if (method === "post" || method === "put" || method === "delete" || method === "get")
-	{
+	if ( method === "post" || method === "put" || method === "delete" || method === "get")
+	{	
 		this.app[method](route, (req, res) =>
 		{
 			try
 			{
+				if (!options || !options.acceptFiles) {
+					if (req.files && req.files.length) {
+						throw "Send files for this route is not allowed";
+					}
+				}
+
 				this.console.debug(`Route ${req.originalUrl} accessed with method ${method}`);
 				let params = _extractParams.call(this, req);
 
 				this.logRequest (req);
-
 
 				let out = callback(params, (err, data) =>
 				{
@@ -379,7 +384,7 @@ function _request(method, route, streamResponse, callback)
 	}
 };
 
-ExpressWrapper.prototype.get = function(route, streamResponse, callback)
+ExpressWrapper.prototype.get = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -387,10 +392,10 @@ ExpressWrapper.prototype.get = function(route, streamResponse, callback)
 		streamResponse = false;
 	}
 
-	_request.call(this, "get", route, streamResponse, callback);
+	_request.call(this, "get", route, streamResponse, callback, options);
 };
 
-ExpressWrapper.prototype.post = function(route, streamResponse, callback)
+ExpressWrapper.prototype.post = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -398,27 +403,27 @@ ExpressWrapper.prototype.post = function(route, streamResponse, callback)
 		streamResponse = false;
 	}
 
-	_request.call(this, "post", route, streamResponse, callback);
+	_request.call(this, "post", route, streamResponse, callback, options);
 };
 
-ExpressWrapper.prototype.put = function(route, streamResponse, callback)
+ExpressWrapper.prototype.put = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "put", route, streamResponse, callback);
+	_request.call(this, "put", route, streamResponse, callback, options, options);
 };
 
-ExpressWrapper.prototype.delete = function(route, streamResponse, callback)
+ExpressWrapper.prototype.delete = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "delete", route, streamResponse, callback);
+	_request.call(this, "delete", route, streamResponse, callback, options);
 };
 
 ExpressWrapper.prototype.getApp = function()
