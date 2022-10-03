@@ -9,12 +9,13 @@ const NHttpError = require('./nhttperror')
 const Timer      = require('./timer');
 const uid        = require('shortid');
 const boolParser = require('express-query-boolean');
-const multer = require("multer");
+const fileupload = require("express-fileupload");
 
 function ExpressWrapper(app)
 {
 	this.auth_mode = ExpressWrapper.AUTH_NONE;
 	this.auth_arg = null;
+	app.use(fileupload({ createParentPath: true }));
 	app.use(boolParser());
 	this.app = app;
 	this.logLevel = ExpressWrapper.LOG_NONE;
@@ -325,25 +326,24 @@ function sendResponse (req, res, err, streamResponse, data, outMimeType = null)
 	}
 }
 
-function _request(method, route, streamResponse, callback, middlewares)
+function _request(method, route, streamResponse, callback, options)
 {
 	if ( method === "post" || method === "put" || method === "delete" || method === "get")
-	{
-		if (middlewares) {
-			middlewares.forEach(middleware => {
-				this.app.use(route, middleware);	
-			});
-		}
-		
+	{	
 		this.app[method](route, (req, res) =>
 		{
 			try
 			{
+				if (!options || !options.acceptFiles) {
+					if (req.files && req.files.length) {
+						throw "Send files for this route is not allowed";
+					}
+				}
+
 				this.console.debug(`Route ${req.originalUrl} accessed with method ${method}`);
 				let params = _extractParams.call(this, req);
 
 				this.logRequest (req);
-
 
 				let out = callback(params, (err, data) =>
 				{
@@ -384,7 +384,7 @@ function _request(method, route, streamResponse, callback, middlewares)
 	}
 };
 
-ExpressWrapper.prototype.get = function(route, streamResponse, callback, middlewares)
+ExpressWrapper.prototype.get = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -392,10 +392,10 @@ ExpressWrapper.prototype.get = function(route, streamResponse, callback, middlew
 		streamResponse = false;
 	}
 
-	_request.call(this, "get", route, streamResponse, callback, middlewares);
+	_request.call(this, "get", route, streamResponse, callback, options);
 };
 
-ExpressWrapper.prototype.post = function(route, streamResponse, callback, middlewares)
+ExpressWrapper.prototype.post = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
@@ -403,27 +403,27 @@ ExpressWrapper.prototype.post = function(route, streamResponse, callback, middle
 		streamResponse = false;
 	}
 
-	_request.call(this, "post", route, streamResponse, callback, middlewares);
+	_request.call(this, "post", route, streamResponse, callback, options);
 };
 
-ExpressWrapper.prototype.put = function(route, streamResponse, callback, middlewares)
+ExpressWrapper.prototype.put = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "put", route, streamResponse, callback, middlewares, middlewares);
+	_request.call(this, "put", route, streamResponse, callback, options, options);
 };
 
-ExpressWrapper.prototype.delete = function(route, streamResponse, callback, middlewares)
+ExpressWrapper.prototype.delete = function(route, streamResponse, callback, options)
 {
 	if (typeof(streamResponse) === 'function')
 	{
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "delete", route, streamResponse, callback, middlewares);
+	_request.call(this, "delete", route, streamResponse, callback, options);
 };
 
 ExpressWrapper.prototype.getApp = function()

@@ -36,9 +36,9 @@
         "clean-build-ts": "rm -rf types; tsc; ./prepend-copyright-notice-d-ts.sh"
     },
     "dependencies": {
+        "express-fileupload": "^1.4.0",
         "express-query-boolean": "^2.0.0",
         "jsonwebtoken": "^8.5.1",
-        "multer": "^1.4.5-lts.1",
         "shortid": "^2.2.14",
         "ws": "^7.0.0"
     },
