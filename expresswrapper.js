@@ -335,8 +335,8 @@ function _request(method, route, streamResponse, callback, options)
 			try
 			{
 				if (!options || !options.acceptFiles) {
-					if (req.files && req.files.length) {
-						throw "Send files for this route is not allowed";
+					if (req.files && Object.entries(req.files).length) {
+						throw new NHttpError(405, "Sending files to this route is not allowed.");
 					}
 				}
 
@@ -435,7 +435,11 @@ function sendException(res, exp)
 {
 	this.console.trace(`[Exception handled by express wrapper] ${exp}`);
 
-	res.status(500).send("Internal Error");
+	if (exp instanceof NHttpError) {
+		res.status(exp.code).send(exp.payload);
+	} else {
+		res.status(500).send("Internal Error");
+	}
 }
 
 ExpressWrapper.AUTH_NONE        = 1;
