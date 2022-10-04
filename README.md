@@ -23,6 +23,13 @@ const { ExpressWrapper } = require ('ninja-util');
 
 ```
 
+The wrappers methods for each http method have the `options` parameter, used to send optional settings.
+
+To allow file upload in a specific route, the user should set:
+```js
+options.acceptFiles = true
+```
+
 ## Heap
 
 > TODO

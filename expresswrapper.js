@@ -413,7 +413,7 @@ ExpressWrapper.prototype.put = function(route, streamResponse, callback, options
 		callback = streamResponse;
 		streamResponse = false;
 	}
-	_request.call(this, "put", route, streamResponse, callback, options, options);
+	_request.call(this, "put", route, streamResponse, callback, options);
 };
 
 ExpressWrapper.prototype.delete = function(route, streamResponse, callback, options)
