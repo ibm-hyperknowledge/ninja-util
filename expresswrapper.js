@@ -334,11 +334,14 @@ function _request(method, route, streamResponse, callback, options)
 		{
 			try
 			{
-				if (!options || !options.acceptFiles) {
-					if (req.files && Object.entries(req.files).length) {
-						throw new NHttpError(405, "Sending files to this route is not allowed.");
-					}
-				}
+				//To block the upload of files through unexpected endpoints uncomment this
+				//Not currently enabled to avoid retrocompatibility issues
+				//Could be included in a future major release
+				//if (!options || !options.acceptFiles) {
+				//	if (req.files && Object.entries(req.files).length) {
+				//		throw new NHttpError(405, "Sending files to this route is not allowed.");
+				//	}
+				//}
 
 				this.console.debug(`Route ${req.originalUrl} accessed with method ${method}`);
 				let params = _extractParams.call(this, req);
